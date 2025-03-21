@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dreams Events e-Shop</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 0; }
+    header { background: #222; color: white; padding: 20px; text-align: center; }
+    h1 { margin: 0; }
+    .category { padding: 20px; max-width: 1000px; margin: auto; }
+    .category h2 { border-bottom: 2px solid #ccc; padding-bottom: 10px; }
+    .item-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+    .item { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
+    .item img { max-width: 100%; height: 120px; object-fit: cover; border-radius: 6px; }
+    .item input[type='number'] { width: 60px; margin-top: 10px; }
+    .checkout { text-align: center; margin: 40px 0; }
+    .btn { background: #ff4081; color: white; padding: 12px 24px; border: none; border-radius: 30px; font-size: 1em; cursor: pointer; }
+    .thank-you { display: none; text-align: center; color: green; font-size: 1.2em; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Dreams Events</h1>
+    <p>Susikomplektuokite savo renginio paslaugas</p>
+  </header>
+
+  <form id="orderForm" action="https://formsubmit.co/dreamsevents.lt@gmail.com" method="POST" onsubmit="return handleSubmit()">
+    <input type="hidden" name="_captcha" value="false">
+    <input type="hidden" name="_subject" value="Naujas renginio užsakymas">
+    <input type="hidden" name="_template" value="table">
+    <input type="hidden" name="Uzsakymo suvestine" id="orderSummary">
+
+    <!-- RENGINIŲ KOMANDOS -->
+    <div class="category">
+      <h2>Renginių komandos</h2>
+      <div class="item-grid">
+        <div class="item">
+          <img src="https://via.placeholder.com/200x120?text=Komanda+1" alt="Komanda 1">
+          <h4>Komanda 1</h4>
+          <p>Kaina: 500€</p>
+          <input type="number" min="0" value="0" data-title="Komanda 1" data-price="500">
+        </div>
+        <div class="item">
+          <img src="https://via.placeholder.com/200x120?text=Komanda+2" alt="Komanda 2">
+          <h4>Komanda 2</h4>
+          <p>Kaina: 650€</p>
+          <input type="number" min="0" value="0" data-title="Komanda 2" data-price="650">
+        </div>
+      </div>
+    </div>
+
+    <!-- MAISTAS IR SALĖS -->
+    <div class="category">
+      <h2>Maistas ir salės</h2>
+      <div class="item-grid">
+        <div class="item">
+          <img src="https://via.placeholder.com/200x120?text=Salė" alt="Salė">
+          <h4>Pokylių salė</h4>
+          <p>Kaina: 400€</p>
+          <input type="number" min="0" value="0" data-title="Pokylių salė" data-price="400">
+        </div>
+        <div class="item">
+          <img src="https://via.placeholder.com/200x120?text=Maistas" alt="Maistas">
+          <h4>Maisto tiekimas</h4>
+          <p>Kaina: 20€ / asm.</p>
+          <input type="number" min="0" value="0" data-title="Maisto tiekimas" data-price="20">
+        </div>
+      </div>
+    </div>
+
+    <!-- TRANSPORTAS IR KITA -->
+    <div class="category">
+      <h2>Transportas ir kiti partneriai</h2>
+      <div class="item-grid">
+        <div class="item">
+          <img src="https://via.placeholder.com/200x120?text=Limuzinas" alt="Limuzinas">
+          <h4>Limuzinų nuoma</h4>
+          <p>Kaina: 150€</p>
+          <input type="number" min="0" value="0" data-title="Limuzinų nuoma" data-price="150">
+        </div>
+        <div class="item">
+          <img src="https://via.placeholder.com/200x120?text=Gėlės" alt="Gėlės">
+          <h4>Gėlių dekoras</h4>
+          <p>Kaina: 100€</p>
+          <input type="number" min="0" value="0" data-title="Gėlių dekoras" data-price="100">
+        </div>
+      </div>
+    </div>
+
+    <div class="checkout">
+      <p><strong>Bendra suma: <span id="total">0</span>€</strong></p>
+      <label>Jūsų vardas:<br><input type="text" name="Vardas" required></label><br><br>
+      <label>El. paštas:<br><input type="email" name="El. paštas" required></label><br><br>
+      <button type="submit" class="btn">Užakyti</button>
+      <div class="thank-you" id="thankYou">Ačiū! Jūsų užsakymas gautas ❤️</div>
+    </div>
+  </form>
+
+  <script>
+    const inputs = document.querySelectorAll('input[type="number"]');
+    const totalDisplay = document.getElementById('total');
+
+    inputs.forEach(input => {
+      input.addEventListener('input', updateTotal);
+    });
+
+    function updateTotal() {
+      let sum = 0;
+      inputs.forEach(input => {
+        const quantity = parseInt(input.value) || 0;
+        const price = parseFloat(input.dataset.price);
+        sum += quantity * price;
+      });
+      totalDisplay.textContent = sum.toFixed(2);
+    }
+
+    function handleSubmit() {
+      const summary = [];
+      inputs.forEach(input => {
+        const quantity = parseInt(input.value);
+        if (quantity && quantity > 0) {
+          const title = input.dataset.title;
+          const price = parseFloat(input.dataset.price);
+          summary.push(`${title} - ${quantity} vnt. x ${price}€ = ${(quantity * price).toFixed(2)}€`);
+        }
+      });
+
+      if (summary.length === 0) {
+        alert("Pasirinkite bent vieną paslaugą.");
+        return false;
+      }
+
+      document.getElementById('orderSummary').value = summary.join('\n');
+      document.getElementById('thankYou').style.display = 'block';
+      return true;
+    }
+  </script>
+</body>
+</html>
