@@ -8,95 +8,591 @@
     body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 0; }
     header { background: #222; color: white; padding: 20px; text-align: center; }
     h1 { margin: 0; }
-    .category { padding: 20px; max-width: 1000px; margin: auto; }
+    nav { background: #444; padding: 10px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+    nav button { background: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    .dropdown-content, .sub-dropdown { display: none; background: #eee; padding: 10px; border-radius: 8px; margin: 10px auto; max-width: 600px; }
+    .dropdown-content.active, .sub-dropdown.active { display: block; }
+    .category { padding: 20px; max-width: 1000px; margin: auto; display: none; }
+    .category.active { display: block; }
     .category h2 { border-bottom: 2px solid #ccc; padding-bottom: 10px; }
     .item-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
     .item { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
-    .item img { max-width: 100%; height: 120px; object-fit: cover; border-radius: 6px; }
-    .item input[type='number'] { width: 60px; margin-top: 10px; }
+    .item input[type='number'], .item input[type='date'] { width: 60%; margin-top: 10px; padding: 6px; border-radius: 6px; border: 1px solid #ccc; }
     .checkout { text-align: center; margin: 40px 0; }
     .btn { background: #ff4081; color: white; padding: 12px 24px; border: none; border-radius: 30px; font-size: 1em; cursor: pointer; }
     .thank-you { display: none; text-align: center; color: green; font-size: 1.2em; margin-top: 20px; }
-  </style>
+    .gallery { max-width: 1000px; margin: 40px auto; text-align: center; }
+    .gallery h2 { margin-bottom: 20px; }
+    .gallery-placeholder { background: #ddd; padding: 40px; border-radius: 10px; font-style: italic; }
+  .lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  display: none;
+}
+.lightbox img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+}
+.lightbox.active {
+  display: flex;
+}
+.filter-bar {
+  text-align: center;
+  margin: 20px auto;
+}
+.filter-bar select {
+  padding: 8px 12px;
+  font-size: 1em;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin: 0 10px;
+}
+.carousel-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+$1
+
+.item-description {
+  font-size: 0.9em;
+  color: #555;
+  margin-top: 8px;
+}
+.item-label {
+  font-weight: bold;
+  display: block;
+  margin-top: 6px;
+}
+.fade-in {
+  animation: fadeIn 0.6s ease-in-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 </head>
 <body>
   <header>
     <h1>Dreams Events</h1>
     <p>Susikomplektuokite savo renginio paslaugas</p>
   </header>
+<div style="text-align: right; padding: 10px;">
+  <button id="loginBtn" class="btn">Prisijungti su Google</button>
+  <span id="userDisplay" style="margin-left: 10px; font-weight: bold;"></span>
+</div>
 
-  <form id="orderForm" action="https://formsubmit.co/dreamsevents.lt@gmail.com" method="POST" onsubmit="return handleSubmit()">
-    <input type="hidden" name="_captcha" value="false">
-    <input type="hidden" name="_subject" value="Naujas renginio užsakymas">
-    <input type="hidden" name="_template" value="table">
-    <input type="hidden" name="Uzsakymo suvestine" id="orderSummary">
+  <nav>
+    <button onclick="toggleDropdown('komandosDropdown')">Komandos</button>
+    <button onclick="toggleDropdown('gelesDropdown')">Gėlių studijos</button>
+    <button onclick="toggleDropdown('maistasDropdown')">Maisto tiekimas</button>
+    <button onclick="toggleDropdown('spaustuveDropdown')">Spaustuvė</button>
+    <button onclick="toggleDropdown('limuzinaiDropdown')">Limuzinų nuoma</button>
+    <button onclick="toggleDropdown('grozisDropdown')">Grožio salonai</button>
+    <button onclick="toggleDropdown('papuosalaiDropdown')">Juvelyrika</button>
+    <button onclick="toggleDropdown('galerijaDropdown')">Galerija</button>
+  </nav>
 
-    <!-- RENGINIŲ KOMANDOS -->
-    <div class="category">
-      <h2>Renginių komandos</h2>
-      <div class="item-grid">
-        <div class="item">
-          <img src="https://raw.githubusercontent.com/dreamsevents/dreamsevents.lt/blob/88956db12a35f51f864b8d54cffa567b80aff5de/Komanda%20nr.1.png" alt="Komanda 1">
-          <h4>Komanda 1</h4>
-          <p>Kaina: 500€</p>
-          <input type="number" min="0" value="0" data-title="Komanda 1" data-price="500">
-        </div>
-        <div class="item">
-          <img src="https://raw.githubusercontent.com/dreamsevents/dreamsevents.lt/blob/88956db12a35f51f864b8d54cffa567b80aff5de/Komanda%20nr.2.png" alt="Komanda 2">
-          <h4>Komanda 2</h4>
-          <p>Kaina: 650€</p>
-          <input type="number" min="0" value="0" data-title="Komanda 2" data-price="650">
-        </div>
-      </div>
+  <div id="komandosDropdown" class="dropdown-content">
+    <button onclick="toggleCategory('komanda1')">Komanda nr.1</button>
+    <button onclick="toggleCategory('komanda2')">Komanda nr.2</button>
+  </div>
+
+  <div id="gelesDropdown" class="dropdown-content">
+    <select onchange="toggleMiestas(this.value)">
+      <option value="">Pasirinkite miestą</option>
+      <option value="vilnius">Vilnius</option>
+      <option value="kaunas">Kaunas</option>
+      <option value="klaipeda">Klaipėda</option>
+      <option value="siauliai">Šiauliai</option>
+      <option value="panevezys">Panevėžys</option>
+      <option value="alytus">Alytus</option>
+      <option value="marijampole">Marijampolė</option>
+      <option value="utena">Utena</option>
+      <option value="telsiai">Telšiai</option>
+      <option value="taurage">Tauragė</option>
+    </select>
+  </div>
+
+  <div id="maistasDropdown" class="dropdown-content">
+    <p>Maisto tiekimo paslaugų planai bus čia...</p>
+  </div>
+
+  <div id="spaustuveDropdown" class="dropdown-content">
+    <p>Spaudos ir dizaino paslaugos...</p>
+  </div>
+
+  <div id="limuzinaiDropdown" class="dropdown-content">
+    <p>Limuzinų nuomos pasirinkimai...</p>
+  </div>
+
+  <div id="grozisDropdown" class="dropdown-content">
+    <p>Grožio salonų pasirinkimai...</p>
+  </div>
+
+  <div id="papuosalaiDropdown" class="dropdown-content">
+    <p>Juvelyrikos paslaugos ir pasirinkimai...</p>
+  </div>
+
+  <div id="galerijaDropdown" class="dropdown-content">
+  <div class="gallery">
+  $1
+    <label for="monthFilter">Mėnuo:</label>
+    <select id="monthFilter" onchange="filterGalleryByYear()">
+      <option value="">Visi</option>
+      <option value="01">Sausis</option>
+      <option value="02">Vasaris</option>
+      <option value="03">Kovas</option>
+      <option value="04">Balandis</option>
+      <option value="05">Gegužė</option>
+      <option value="06">Birželis</option>
+      <option value="07">Liepa</option>
+      <option value="08">Rugpjūtis</option>
+      <option value="09">Rugsėjis</option>
+      <option value="10">Spalis</option>
+      <option value="11">Lapkritis</option>
+      <option value="12">Gruodis</option>
+    </select>
+  </div>
+    <h2>Mūsų renginių galerija</h2>
+    <div id="galleryContainer" class="fade-in">Kraunama galerija iš Google Drive...</div>
+  </div>
+    <div id="lightbox" class="lightbox" onclick="this.classList.remove('active')">
+      <img src="" alt="Galerijos nuotrauka" />
     </div>
-
-    <div class="checkout">
-      <p><strong>Bendra suma: <span id="total">0</span>€</strong></p>
-      <label>Jūsų vardas:<br><input type="text" name="Vardas" required></label><br><br>
-      <label>El. paštas:<br><input type="email" name="El. paštas" required></label><br><br>
-      <button type="submit" class="btn">Užakyti</button>
-      <div class="thank-you" id="thankYou">Ačiū! Jūsų užsakymas gautas ❤️</div>
+    <div class="filter-bar">
+      <label for="tagFilter">Filtruoti pagal žymą:</label>
+      <select id="tagFilter" onchange="filterGalleryByTag()">
+        <option value="">Visos žymos</option>
+      </select>
     </div>
-  </form>
+  </div>
+  <div id="komanda1" class="category">
+    <h2>Komanda nr.1 – planų pasirinkimas</h2>
+    <label>Pasirinkite datą:<br><input type="date" name="data_komanda1"></label>
+    <p>Čia bus rodomi visi Komandos nr.1 planai (bronzinis, sidabrinis, auksinis)</p>
+  </div>
 
-  <script>
-    const inputs = document.querySelectorAll('input[type="number"]');
-    const totalDisplay = document.getElementById('total');
+  <div id="komanda2" class="category">
+    <h2>Komanda nr.2 – planų pasirinkimas</h2>
+    <label>Pasirinkite datą:<br><input type="date" name="data_komanda2"></label>
+    <p>Čia bus rodomi visi Komandos nr.2 planai (bronzinis, sidabrinis, auksinis)</p>
+  </div>
 
-    inputs.forEach(input => {
-      input.addEventListener('input', updateTotal);
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js">document.getElementById("loginBtn").addEventListener("click", () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider).catch(console.error);
+});
+function sendEmailNotification(imageName, commentText) {
+  fetch("https://script.google.com/macros/s/AKfycbxSF_mxlPzm627rvMyXGhn2rG5nponctsciBbdmzFh9pe4kq8Yh7_Uv2_Ytl5oqenrI/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    const category = extractTagsFromName(imageName)[0] || "nežinoma";
+    body: JSON.stringify({
+      image: imageName,
+      imageUrl: firebase.storage ? mediaEl?.src || '' : '',
+      comment: commentText,
+      username: firebase.auth().currentUser?.displayName || firebase.auth().currentUser?.email || "Svečias",
+      timestamp: new Date().toISOString(),
+      category: category
+    })
+  }).then(res => console.log("Pranešimas išsiųstas.")).catch(err => console.error("Klaida siunčiant el. laišką:", err));
+}
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>function displayComment(wrapper, imageName, commentText, commentId, commentUser) {
+  const comment = document.createElement("div");
+  comment.className = "item-description";
+  comment.style.color = "#333";
+  comment.style.marginTop = "6px";
+  // Komentaro laikas bus nustatytas iš Firebase timestamp duomenų
+  comment.textContent = `Komentaras: ${commentText}`;
+
+  if (firebase.auth().currentUser && firebase.auth().currentUser.uid === commentUser) {
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "🗑️";
+    deleteBtn.style.marginLeft = "10px";
+    deleteBtn.style.cursor = "pointer";
+    deleteBtn.onclick = () => {
+      if (confirm("Ar tikrai norite ištrinti komentarą?")) {
+        db.ref(`comments/${commentId}`).remove();
+        comment.remove();
+      }
+    };
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "✏️";
+    editBtn.style.marginLeft = "6px";
+    editBtn.style.cursor = "pointer";
+    editBtn.onclick = () => {
+      const newText = prompt("Redaguoti komentarą:", commentText);
+      if (newText !== null && newText.trim() !== "") {
+        db.ref(`comments/${commentId}`).update({ comment: newText });
+        comment.textContent = `Komentaras: ${newText} (${time})`;
+        comment.appendChild(deleteBtn);
+        comment.appendChild(editBtn);
+      }
+    };
+    comment.appendChild(deleteBtn);
+    comment.appendChild(editBtn);
+  }
+
+  wrapper.appendChild(comment);
+}
+
+function loadComments(wrapper, imageName) {
+  db.ref('comments').orderByChild('image').equalTo(imageName).once('value', snapshot => {
+    snapshot.forEach(child => {
+      const data = child.val();
+      if (data.comment) {
+        const name = data.user === "svečias" ? "Svečias" : `Vartotojas: ${data.user}`;
+        displayComment(wrapper, imageName, `${data.username || 'Svečias'}: ${data.comment}`, child.key, data.user)
+      }
+    });
+  });
+}
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script>
+    const firebaseConfig = {
+  apiKey: "AIzaSyCiE9o_ltxRZmTS1i7L4zltSdpv2Bj0qEI",
+  authDomain: "dreamsevents.firebaseapp.com",
+  databaseURL: "https://dreamsevents-default-rtdb.firebaseio.com",
+  projectId: "dreamsevents",
+  storageBucket: "dreamsevents.firebasestorage.app",
+  messagingSenderId: "144366813900",
+  appId: "1:144366813900:web:d6af7018c04976d3b4f869",
+  measurementId: "G-B71T5YHJJQ"
+};
+
+firebase.initializeApp(firebaseConfig);
+firebase.auth().onAuthStateChanged(user => {
+  const loginBtn = document.getElementById("loginBtn");
+  const userDisplay = document.getElementById("userDisplay");
+  if (user) {
+    userDisplay.textContent = user.displayName || user.email || "Anonimas";
+    loginBtn.style.display = "none";
+  } else {
+    loginBtn.style.display = "inline-block";
+    userDisplay.textContent = "";
+  }
+});
+const db = firebase.database();
+
+function saveComment(imageName, commentText) {
+  sendEmailNotification(imageName, commentText);
+  const commentRef = db.ref('comments').push();
+  const user = firebase.auth().currentUser;
+  const username = user?.displayName || user?.email || "Svečias";
+  commentRef.set({
+    user: firebase.auth().currentUser ? firebase.auth().currentUser.uid : "svečias",
+    username: username,
+    comment: commentText,
+    timestamp: new Date().toISOString()
+  });
+}
+
+
+      document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('active'));
+      const el = document.getElementById(id);
+      if (el) el.classList.add('active');
+    }
+
+    function toggleCategory(id) {
+      document.querySelectorAll('.category').forEach(c => c.classList.remove('active'));
+      const el = document.getElementById(id);
+      if (el) el.classList.add('active');
+    }
+
+    function toggleMiestas(miestoId) {
+      alert('Bus atidarytas gėlių planų blokas miestui: ' + miestoId);
+    }
+    fetch("https://script.google.com/macros/s/AKfycbyVt8NQpQ8-n-vg5H1MtrYxGiK2Xm_CdLL9ub-7VOVapsWbm8LnWoJL8JoBIPOrIa7d/exec")
+  .then(res => res.json())
+  .then(data => {
+    const container = document.getElementById("galleryContainer");
+    container.innerHTML = '';
+
+    const grouped = {};
+    const yearSet = new Set();
+    const tagSet = new Set();
+    data.forEach(img => {
+      const date = img.name.split("_")[0];
+      const year = date.split("-")[0];
+      yearSet.add(year);
+      if (!grouped[date]) grouped[date] = [];
+      grouped[date].push(img);
     });
 
-    function updateTotal() {
-      let sum = 0;
-      inputs.forEach(input => {
-        const quantity = parseInt(input.value) || 0;
-        const price = parseFloat(input.dataset.price);
-        sum += quantity * price;
-      });
-      totalDisplay.textContent = sum.toFixed(2);
-    }
+    const yearFilter = document.getElementById("yearFilter");
+    Array.from(yearSet).sort().forEach(year => {
+      const option = document.createElement("option");
+      option.value = year;
+      option.textContent = year;
+      yearFilter.appendChild(option);
+    });
+    addTagToDropdown(tagSet
+    });
 
-    function handleSubmit() {
-      const summary = [];
-      inputs.forEach(input => {
-        const quantity = parseInt(input.value);
-        if (quantity && quantity > 0) {
-          const title = input.dataset.title;
-          const price = parseFloat(input.dataset.price);
-          summary.push(`${title} - ${quantity} vnt. x ${price}€ = ${(quantity * price).toFixed(2)}€`);
+    for (const date in grouped) {
+      grouped[date].sort((a, b) => a.name.localeCompare(b.name));
+
+      const album = document.createElement("div");
+      album.style.marginBottom = "30px";
+
+      const title = document.createElement("h3");
+      title.textContent = `Albumas: ${date}`;
+      album.appendChild(title);
+
+      const row = document.createElement("div");
+      row.style.display = "flex";
+      row.style.flexWrap = "wrap";
+      row.style.justifyContent = "center";
+
+      const mediaElements = [];
+      grouped[date].forEach(img => {
+        const isVideo = img.name.toLowerCase().endsWith('.mp4') || img.name.toLowerCase().endsWith('.webm');
+        let mediaEl;
+        if (isVideo) {
+          mediaEl = document.createElement("video");
+          mediaEl.src = img.url;
+          mediaEl.controls = true;
+          mediaEl.style.maxWidth = "300px";
+          mediaEl.style.margin = "10px";
+          mediaEl.style.borderRadius = "8px";
+          mediaEl.style.boxShadow = "0 0 10px rgba(0,0,0,0.2)";
+        } else {
+          mediaEl = document.createElement("img");
+          mediaEl.src = img.url;
+          mediaEl.alt = img.name;
+          mediaEl.style.maxWidth = "200px";
+          mediaEl.style.margin = "10px";
+          mediaEl.style.borderRadius = "8px";
+          mediaEl.style.boxShadow = "0 0 10px rgba(0,0,0,0.2)";
+          mediaEl.style.cursor = "pointer";
+          mediaEl.onclick = () => openLightbox(img.url);
         }
+        const wrapper = document.createElement("div");
+wrapper.style.display = "flex";
+wrapper.style.flexDirection = "column";
+wrapper.style.alignItems = "center";
+wrapper.appendChild(mediaEl);
+
+const desc = document.createElement("div");
+desc.className = "item-description";
+const rawName = img.name.replace(/\.[^/.]+$/, "");
+const parts = rawName.split("_").slice(1);
+desc.textContent = parts.length ? parts.join(" ").replace(/[-_]/g, " ") : rawName.replace(/[-_]/g, " ");
+
+const tags = extractTagsFromName(img.name);
+      tags.forEach(tag => tagSet.add(tag));
+if (tags.length) {
+  const tagList = document.createElement("div");
+  tagList.style.marginTop = "4px";
+  tagList.style.fontSize = "0.85em";
+  tagList.style.color = "#888";
+  tagList.innerText = "Žymos: " + tags.join(", ");
+  wrapper.appendChild(tagList);
+}
+wrapper.appendChild(desc);
+
+const commentBox = document.createElement("textarea");
+commentBox.placeholder = "Palikite komentarą...";
+commentBox.style.width = "180px";
+commentBox.style.marginTop = "8px";
+commentBox.style.borderRadius = "6px";
+commentBox.style.border = "1px solid #ccc";
+commentBox.style.padding = "6px";
+commentBox.rows = 2;
+if (firebase.auth().currentUser) {
+  wrapper.appendChild(commentBox);
+
+const submitBtn = document.createElement("button");
+submitBtn.textContent = "Siųsti";
+submitBtn.style.marginTop = "6px";
+submitBtn.style.padding = "6px 12px";
+submitBtn.style.borderRadius = "6px";
+submitBtn.style.border = "none";
+submitBtn.style.backgroundColor = "#28a745";
+submitBtn.style.color = "white";
+submitBtn.style.cursor = "pointer";
+submitBtn.onclick = () => {
+  if (commentBox.value.trim()) {
+    saveComment(img.name, commentBox.value.trim());
+    commentBox.value = "";
+    displayComment(wrapper, img.name, commentBox.value.trim());
+    alert("Komentaras išsaugotas!");
+  } else {
+    alert("Įrašykite komentarą");
+  }
+};
+  wrapper.appendChild(submitBtn);
+} // tik jei prisijungęs
+db.ref('comments').orderByChild('image').equalTo(img.name).on('value', snapshot => {
+  const existingComments = wrapper.querySelectorAll('.item-description');
+  existingComments.forEach(c => c.remove());
+  snapshot.forEach(child => {
+    const data = child.val();
+    if (data.comment) {
+      const name = data.user === "svečias" ? "Svečias" : `Vartotojas: ${data.user}`;
+      const commentDate = new Date(data.timestamp).toLocaleString('lt-LT');
+      displayComment(wrapper, img.name, `${data.username || 'Svečias'}: ${data.comment} (${commentDate})`, child.key, data.user);
+    }
+  });
+});
+
+mediaElements.push(wrapper);
+      });
+      row.dataset.album = date;
+      carouselState[date] = 0;
+      showCarouselStep(row, mediaElements, 0);
+
+      album.appendChild(row);
+      album.dataset.tags = tags.join(", ");
+      container.appendChild(album);
+    }
+  })
+  .catch(err => {
+    document.getElementById("galleryContainer").innerHTML = "Nepavyko įkelti galerijos. Bandykite vėliau.";
+  });
+
+function openLightbox(url) {
+  const lightbox = document.getElementById("lightbox");
+  const img = lightbox.querySelector("img");
+  img.src = url;
+  lightbox.classList.add("active");
+}
+$1
+  const selectedMonth = document.getElementById("monthFilter").value;
+  fetch("https://script.google.com/macros/s/AKfycbyVt8NQpQ8-n-vg5H1MtrYxGiK2Xm_CdLL9ub-7VOVapsWbm8LnWoJL8JoBIPOrIa7d/exec")
+    .then(res => res.json())
+    .then(data => {
+      const container = document.getElementById("galleryContainer");
+      container.innerHTML = '';
+
+      const grouped = {};
+      data.forEach(img => {
+        const date = img.name.split("_")[0];
+        if (!grouped[date]) grouped[date] = [];
+        grouped[date].push(img);
       });
 
-      if (summary.length === 0) {
-        alert("Pasirinkite bent vieną paslaugą.");
-        return false;
-      }
+      for (const date in grouped) {
+        if (selectedYear && !date.startsWith(selectedYear)) continue;
+        if (selectedMonth && date.slice(5, 7) !== selectedMonth) continue;
 
-      document.getElementById('orderSummary').value = summary.join('\n');
-      document.getElementById('thankYou').style.display = 'block';
-      return true;
+        grouped[date].sort((a, b) => a.name.localeCompare(b.name));
+
+        const album = document.createElement("div");
+        album.style.marginBottom = "30px";
+
+        const title = document.createElement("h3");
+        title.textContent = `Albumas: ${date}`;
+        album.appendChild(title);
+
+        const row = document.createElement("div");
+        row.style.display = "flex";
+        row.style.flexWrap = "wrap";
+        row.style.justifyContent = "center";
+
+        grouped[date].forEach(img => {
+          const isVideo = img.name.toLowerCase().endsWith('.mp4') || img.name.toLowerCase().endsWith('.webm');
+          let mediaEl;
+          if (isVideo) {
+            mediaEl = document.createElement("video");
+            mediaEl.src = img.url;
+            mediaEl.controls = true;
+            mediaEl.style.maxWidth = "300px";
+            mediaEl.style.margin = "10px";
+            mediaEl.style.borderRadius = "8px";
+            mediaEl.style.boxShadow = "0 0 10px rgba(0,0,0,0.2)";
+          } else {
+            mediaEl = document.createElement("img");
+            mediaEl.src = img.url;
+            mediaEl.alt = img.name;
+            mediaEl.style.maxWidth = "200px";
+            mediaEl.style.margin = "10px";
+            mediaEl.style.borderRadius = "8px";
+            mediaEl.style.boxShadow = "0 0 10px rgba(0,0,0,0.2)";
+            mediaEl.style.cursor = "pointer";
+            mediaEl.onclick = () => openLightbox(img.url);
+          }
+          row.appendChild(mediaEl);
+        });
+
+        album.appendChild(row);
+        container.appendChild(album);
+      }
+    });
+}
+const carouselState = {};
+function showCarouselStep(container, items, step, stepSize = 3) {
+  container.innerHTML = '';
+  const start = step * stepSize;
+  const end = start + stepSize;
+  const visibleItems = items.slice(start, end);
+
+  visibleItems.forEach(mediaEl => {
+    container.appendChild(mediaEl);
+  });
+
+  const controls = document.createElement('div');
+  controls.className = 'carousel-controls';
+
+  const prevBtn = document.createElement('button');
+  prevBtn.textContent = '◀';
+  prevBtn.onclick = () => {
+    carouselState[container.dataset.album] = Math.max(0, step - 1);
+    showCarouselStep(container, items, carouselState[container.dataset.album]);
+  };
+
+  const nextBtn = document.createElement('button');
+  nextBtn.textContent = '▶';
+  nextBtn.onclick = () => {
+    carouselState[container.dataset.album] = Math.min(Math.ceil(items.length / stepSize) - 1, step + 1);
+    showCarouselStep(container, items, carouselState[container.dataset.album]);
+  };
+
+  controls.appendChild(prevBtn);
+  controls.appendChild(nextBtn);
+  container.appendChild(controls);
+}
+function extractTagsFromName(name) {
+  const parts = name.replace(/\.[^/.]+$/, "").split("_").slice(1);
+  return parts.map(p => p.toLowerCase().replace(/[-_]/g, ' ').trim()).filter(Boolean);
+}
+function filterGalleryByTag() {
+  const selectedTag = document.getElementById("tagFilter").value.toLowerCase();
+  const albums = document.querySelectorAll("[data-tags]");
+
+  albums.forEach(album => {
+    const tags = album.dataset.tags.toLowerCase();
+    if (!selectedTag || tags.includes(selectedTag)) {
+      album.style.display = "block";
+    } else {
+      album.style.display = "none";
     }
-  </script>
+  });
+}
+
+function addTagToDropdown(tagSet) {
+  const tagFilter = document.getElementById("tagFilter");
+  tagSet.forEach(tag => {
+    const option = document.createElement("option");
+    option.value = tag;
+    option.textContent = tag.charAt(0).toUpperCase() + tag.slice(1);
+    tagFilter.appendChild(option);
+  });
+}
+</script>
 </body>
 </html>
